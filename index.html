@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedRAG — Medical AI Assistant</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-icon">⚕</span>
+    <div>
+      <div class="brand-name">MedRAG</div>
+      <div class="brand-sub">Medical AI Assistant</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPanel('chat')">💬 Chat</button>
+    <button class="nav-btn" onclick="showPanel('upload')">📂 Dataset</button>
+    <button class="nav-btn" onclick="showPanel('about')">ℹ️ About</button>
+  </nav>
+
+  <div class="sidebar-stats">
+    <div class="stat-label">Index Stats</div>
+    <div id="statsBox" class="stats-box">Loading…</div>
+  </div>
+
+  <div class="retrieval-ctrl">
+    <div class="stat-label">Top-K Chunks &nbsp;<span id="kLabel">5</span></div>
+    <input type="range" min="1" max="10" value="5" id="kSlider"/>
+  </div>
+
+  <div class="disclaimer-sidebar">
+    For educational purposes only. Not a substitute for medical advice.
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Chat Panel -->
+  <div id="panel-chat" class="panel active">
+    <div class="panel-header">
+      <h1>Medical Q&A</h1>
+      <p>Ask about diseases, symptoms, treatments, or medications.</p>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="message assistant">
+        <div class="msg-avatar">⚕</div>
+        <div class="msg-content">
+          <div class="bubble">
+            Hello! I'm MedRAG, your AI-powered medical information assistant.
+            I use Retrieval-Augmented Generation to answer questions from specialized
+            medical datasets. Ask me about symptoms, diseases, or treatments.
+            <br/><br/>
+            <em>Remember: always consult a qualified professional for personal medical advice.</em>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="suggested">
+        <span class="suggest-label">Try:</span>
+        <button class="suggest-btn" onclick="fillQ('What are the symptoms of diabetes?')">Symptoms of diabetes</button>
+        <button class="suggest-btn" onclick="fillQ('How is hypertension treated?')">Hypertension treatment</button>
+        <button class="suggest-btn" onclick="fillQ('What causes migraine headaches?')">Migraine causes</button>
+      </div>
+      <div class="input-row">
+        <textarea id="qInput" placeholder="Type your medical question…" rows="1"></textarea>
+        <button id="sendBtn" onclick="sendQuestion()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Panel -->
+  <div id="panel-upload" class="panel">
+    <div class="panel-header">
+      <h1>Dataset Manager</h1>
+      <p>Upload CSV or TXT medical datasets to expand the knowledge base.</p>
+    </div>
+
+    <div class="upload-card">
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput" accept=".csv,.txt" style="display:none" onchange="handleUpload(this.files[0])"/>
+        <div class="drop-icon">📁</div>
+        <div>Drop your dataset here or <strong>click to browse</strong></div>
+        <small>CSV or TXT — disease/symptom/treatment data</small>
+      </div>
+
+      <div id="uploadStatus" class="upload-status" style="display:none"></div>
+
+      <div class="csv-guide">
+        <div class="guide-title">Recommended CSV columns</div>
+        <div class="col-chips">
+          <span>Disease</span><span>Symptoms</span><span>Description</span>
+          <span>Treatment</span><span>Cause</span><span>Prevention</span>
+          <span>Medication</span><span>Diet</span>
+        </div>
+        <p class="guide-note">The engine auto-detects and prioritises these column names.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Panel -->
+  <div id="panel-about" class="panel">
+    <div class="panel-header">
+      <h1>About MedRAG</h1>
+      <p>Architecture & technology stack.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-icon">🔍</div>
+        <div class="about-title">Retrieval</div>
+        <div class="about-desc">FAISS IndexFlatIP with cosine similarity for fast semantic search over medical chunks.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🧠</div>
+        <div class="about-title">Embeddings</div>
+        <div class="about-desc">HuggingFace <code>all-MiniLM-L6-v2</code> Sentence-Transformer — 384-dim dense vectors.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">✍️</div>
+        <div class="about-title">Generation</div>
+        <div class="about-desc">Google <code>flan-t5-base</code> — instruction-tuned seq2seq model, runs locally without API keys.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🌐</div>
+        <div class="about-title">Backend</div>
+        <div class="about-desc">Flask REST API with lazy-loaded RAG engine, streaming-ready architecture.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">📦</div>
+        <div class="about-title">Data</div>
+        <div class="about-desc">Auto-detects disease–symptom CSVs and plain-text files. No preprocessing required.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">⚡</div>
+        <div class="about-title">Pipeline</div>
+        <div class="about-desc">Query → Embed → FAISS Search → Prompt Construction → LLM → Structured Response.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
